@@ -1,0 +1,52 @@
+一、环境
+
+HOST：ubuntu-14.04.1-desktop-amd64
+Embedded：freescale imx6 linux-3.0.35
+
+CROSS_COMPILE：freescale提供的gcc-4.6.2-glibc-2.13-linaro-multilib-2011.12
+Qt :  qt-everywhere-opensource-src-5.6.1.tar.gz
+
+tslib：
+
+1.准备工作
+确保以下软件已安装
+
+# apt-get install autoconf（或autoconf2.13）
+# apt-get install automake
+# apt-get install libtool
+
+#!/bin/sh
+./autogen.sh
+make clean && make distclean
+echo "ac_cv_func_malloc_0_nonnull=yes" >arm-linux.cache
+./configure CC=arm-fsl-linux-gnueabi-gcc --host=arm-none-linux-gnueabi --cache-file= arm-linux.cache --prefix=/usr/local/tslib
+make && make install
+
+配置时无法找到编译器：
+sudo apt-get install lib32bz2-1.0；sudo apt-get install lib32z1
+
+编译时出现：
+/home/blzt/Qt/tslib-1.4/tslib-1.4/tests/ts_test.c:125: undefined reference to `rpl_malloc'
+fbutils.o: In function `open_framebuffer':
+/home/blzt/Qt/tslib-1.4/tslib-1.4/tests/fbutils.c:139: undefined reference to `rpl_malloc'
+collect2: ld returned 1 exit status
+解决：
+交叉编译時autotools认为我的工具链的libc中不包含malloc和realloc，然后擅自做主张给我替换成了rpl_malloc和rpl_realloc。把config.h里面的 #define malloc rpl_malloc ，删掉然后重新编译就正常了
+
+directfb：
+配置：
+
+
+Qt：
+配置：
+./configure -prefix /usr/local/Qt-5.6.1 -opensource -confirm-license -release -shared -device imx6 -no-pch -qt-libpng -qt-libjpeg -optimized-qmake -no-cups -no-xcb -no-dbus -no-nis -no-iconv -no-rpath -tslib -directfb -no-openssl -no-iconv -no-separate-debug-info -no-accessibility -no-xcursor -no-xfixes -no-xrandr -no-xrender -no-sse2 -silent -nomake examples -no-compile-examples -nomake tests -qt-freetype -no-glib -no-opengl -opengl es2 -no-use-gold-linker -no-gcc-sysroot -device-option CROSS_COMPILE=/opt/gcc-4.6.2-glibc-2.13-linaro-multilib-2011.12/fsl-linaro-toolchain/bin/arm-fsl-linux-gnueabi- -v;make -j4;make install
+
+配置出错：
+arm-fsl-linux-gnueabi-g++ -c -fvisibility=hidden fvisibility.c
+Symbol visibility control enabled.
+arm-fsl-linux-gnueabi-g++ -o libtest.so -shared -Wl,-Bsymbolic-functions -fPIC bsymbolic_functions.c
+bsymbolic_functions.c:2:2: error: #error "Symbolic function binding on this architecture may be broken, disabling it (see QTBUG-36129)."
+
+解决：未安装g++
+运行sudo apt-get install build-essential 命令安装
+
