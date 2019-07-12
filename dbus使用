@@ -1,0 +1,27 @@
+一。创建xml文件（org.cn180s.dbus.xml），运行：
+/opt/Qt5.6.1/5.6/gcc_64/bin/qdbusxml2cpp -p dbus_interface.h: org.cn180s.dbus.xml
+/opt/Qt5.6.1/5.6/gcc_64/bin/qdbusxml2cpp -a dbus_adaptor.h: org.cn180s.dbus.xml
+用于生成dbus接口。
+二。工程文件加入：
+QT   += dbus
+DBUS_ADAPTORS += ./dbusService/org.cn180s.dbus.xml
+DBUS_INTERFACES += ./dbusService/org.cn180s.dbus.xml
+三。创建适配器创建接口连接信号与槽：
+// add D-Bus interface and connect to D-Bus
+new DbusAdaptor(this);
+QDBusConnection::sessionBus().registerObject("/", this);
+org::cn180s::dbus *iface;
+iface = new org::cn180s::dbus(QString(), QString(), QDBusConnection::sessionBus(), this);
+
+
+createDbus.sh
+dbus_adaptor.h
+dbus_interface.h
+dbusservice.cpp
+dbusservice.h
+org.cn180s.dbus.xml
+
+
+
+
+
