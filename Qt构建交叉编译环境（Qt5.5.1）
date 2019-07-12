@@ -1,0 +1,103 @@
+一、准备工作：
+系统版本：ubuntu14.04
+gcc版本： 4.8.2 （编译器版本很重要，一定要4.8以上）
+源码包：Qt5.5.1源码qt-everywhere-opensource-src-5.5.1.tar.gz、触摸屏源码tslib-1.4.zip、交叉编译器arm-none-linux-gcc-2014.05.tar.gz、Directfb源码DirectFB-1.6.3.tar.gz、expat源码expat-2.0.1.tar.gz、qbus源码dbus-1.3.0.tar.gz
+（注：因为Qt编译源代码需要gcc、g++，因此必须保证gcc、g++都有安装并且版本一致，用gcc -v和g++ -v查看编译器版本，如果没有g++可运行sudo apt-get install build-essential 命令安装）
+
+
+二、安装交叉编译器：
+
+1、解压交叉编译器到/opt下：
+tar -zxvf arm-none-linux-gcc-2014.05.tar.gz -C/opt
+
+2、添加环境变量:
+打开.bashrc文件：vim ~/.bashrc,在此文件的最后加上一句:
+export PATH="/opt/arm-2014.05/bin:$PATH"
+
+3、使环境变量立即生效
+source ~/.bashrc 
+
+三、插件库编译：
+
+1、 编译触摸屏驱动
+（1）、解压tslib1.4并进入其中,编写配置文件:
+vim tslibConf.sh
+
+（2）、在此文件中写入以下内容并保存退出:
+#!/bin/sh
+make clean && make distclean
+echo "ac_cv_func_malloc_0_nonnull=yes" >arm-linux.cache
+CC=arm-none-linux-gnueabi-gcc ./configure --host=arm-none-linux-gnueabi --prefix=/usr/local/tslib --cache-file=arm-
+linux.cache
+make && make install
+
+（3）、交叉编译：
+./ tslibConf .sh
+
+2、编译directfb库
+（1）、编译expat（编译dbus需要expat库）:
+./configure -host=arm-none-linux-gnueabi -prefix=/usr/local/expat
+（2）、编译dbus（运行directfb需要dbus库支持）:
+./configure -host=arm-none-linux-gnueabi -prefix=/usr/local/dbus CC="arm-none-linux-gnueabi-gcc -I/usr/local/expat/include -L/usr/local/expat/lib" --cache-file=arm-linux.cache --with-x=no;make;make install 
+
+（3）、编译directfb（Directfb主要用于硬件性能较低的环境进行图形加速）:
+./configure -host=arm-none-linux-gnueabi -prefix=/usr/local/Directfb -with-gfxdrivers=none -enable-png -enable-jpeg -disable-tiff -enable-sdl=no -enable-gif -disable-x11 -enable-debug -sysconfdir=/etc -enable-fbdev;make;make install
+
+
+三、编译Qt5.5.1
+（1）、解压Qt5.5.1：
+tar -zxvf qt-everywhere-opensource-src-5.5.1.tar.gz
+
+（2）、添加directfb编译选项（在Qt配置文件中添加directfb支持始终不成功，没办法只能手动添加）
+运行命令打开 platforms.pro ：gedit qtbase/src/plugins/platforms/platforms.pro 在 配置linuxfb支持的后面加上directfb参数。
+contains(QT_CONFIG, linuxfb): SUBDIRS += linuxfb directfb
+
+（3）、添加directfb库和头文件路径（因为directfb的支持是手动添加，所以directfb库路径也要手动添加）
+运行命令打开 directfb.pro ：gedit qtbase/src/plugins/platforms/directfb/directfb.pro
+#LIBS += $$QMAKE_LIBS_DIRECTFB
+#QMAKE_CXXFLAGS += $$QMAKE_CFLAGS_DIRECTFB
+LIBS += -L/usr/local/Directfb/lib/ -ldirect -ldirectfb -lfusion
+INCLUDEPATH += /usr/local/Directfb/include/directfb -D_REENTRANT
+
+（4）由于运行Qt的时候如果界面上有文字会出现以下错误： QDirectFBTextureGlyphCache: Unsupported source texture image format.
+运行命令打开 qdirectfbblitter.cpp ： gedit qtbase/src/plugins/platforms/directfb/qdirectfbblitter.cpp
+修改如下：
+default:
+  desc.pixelformat = DSPF_A8;
+  //qFatal("QDirectFBTextureGlyphCache: Unsupported source texture image format.");
+  break;
+
+（5）、配置编译器支持
+运行命令打开 qmake.conf ： gedit qtbase/mkspecs/linux-arm-gnueabi-g++/qmake.conf
+修改如下：
+QT_QPA_DEFAULT_PLATFORM = directfb
+QMAKE_CFLAGS_RELEASE += -O2 -march=armv7-a
+QMAKE_CXXFLAGS_RELEASE += -O2 -march=armv7-a
+
+include(../common/linux.conf)
+include(../common/gcc-base-unix.conf)
+include(../common/g++-unix.conf)
+
+QMAKE_INCDIR += /usr/local/tslib/include
+QMAKE_LIBDIR += /usr/local/tslib/lib
+QMAKE_LIBS += -lts
+
+QMAKE_INCDIR += /usr/local/Directfb/include
+QMAKE_LIBDIR += /usr/local/Directfb/lib
+QMAKE_LIBS += -ldirect -ldirectfb -lfusion
+
+# modifications to g++.conf
+QMAKE_CC = arm-none-linux-gnueabi-gcc -lts -ldirect -ldirectfb -lfusion
+QMAKE_CXX = arm-none-linux-gnueabi-g++ -lts -ldirect -ldirectfb -lfusion
+QMAKE_LINK = arm-none-linux-gnueabi-g++ -lts -ldirect -ldirectfb -lfusion
+QMAKE_LINK_SHLIB = arm-none-linux-gnueabi-g++ -lts -ldirect -ldirectfb -lfusion
+
+# modifications to linux.conf
+QMAKE_AR = arm-none-linux-gnueabi-ar cqs
+QMAKE_OBJCOPY = arm-none-linux-gnueabi-objcopy
+QMAKE_NM = arm-none-linux-gnueabi-nm -P
+QMAKE_STRIP = arm-none-linux-gnueabi-strip
+load(qt_config)
+
+（6）、配置编译选项、编译安装
+./configure -prefix /usr/local/Qt-5.5.1 -opensource -confirm-license -release -shared -xplatform linux-arm-gnueabi-g++ -no-pch -qt-libpng -qt-libjpeg -optimized-qmake -no-cups -no-qml-debug -no-xcb -no-nis -no-iconv -no-rpath -tslib -directfb -no-openssl -no-iconv -no-separate-debug-info -no-accessibility -no-xcursor -no-xfixes -no-xrandr -no-xrender -no-sse2 -silent -nomake examples -no-compile-examples -nomake tests -qt-freetype -no-glib -no-opengl -skip webkit -v;make -j4;make install
