@@ -1,0 +1,52 @@
+1、定义ListView
+Item {
+    id: listViewItem
+    x:52+34;y:88+96;width: 779;height: 384
+    ListView {   //显示路径
+          id: listview
+          model: fruitModel
+          delegate: contactsDelegate
+          anchors.fill: parent
+          clip: true
+    }
+}
+
+ // 滚动条
+Item {
+    id: scrollbar
+    x:52+34+779+14;y:88+76;
+    width: 88+8;height: 328
+    Image{  //滚动条背景
+        x:44;y:0
+        source: "../image/usbImage/pictureImage/USB-bg-scrollbar-de.png"
+    }
+    // 按钮
+    Rectangle {
+        id: button
+        x:44;y: listview.visibleArea.yPosition * scrollbar.height
+        width: 9;height: listview.visibleArea.heightRatio * scrollbar.height;
+        color: "#00fffc"
+        radius: 10
+     }
+     Rectangle{   //拖动区域
+        opacity: 0
+        width: 88+8;height: 328
+        // 鼠标区域
+        MouseArea {
+           id: mouseArea
+            x:52+34+779+14;y:88+76;width: 88+8;height: 328
+            anchors.fill: parent
+            drag.target: button
+            drag.axis: Drag.YAxis
+            drag.minimumY: 0
+            drag.maximumY: scrollbar.height - button.height
+            // 拖动
+            onMouseYChanged: {
+                listview.contentY = button.y / scrollbar.height * listview.contentHeight
+            }
+        }
+   }
+}
+
+2、更新数据需要将ListView回到初始位置
+listview.contentY = 0 //滑动条回到初始位置
