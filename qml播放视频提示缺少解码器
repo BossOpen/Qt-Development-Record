@@ -1,0 +1,20 @@
+错误：
+Cannot connect to server socket err = No such file or directory
+
+Cannot connect to server request channel
+
+jack server is not running or cannot be started
+
+Warning: "No decoder available for type 'video/x-h264, stream-format=(string)avc, alignment=(string)au, level=(string)3, profile=(string)high, codec_data=(buffer)0164001effe1001a6764001eacd9405005bb011000000300100000030320f162d96001000468eaef2c, width=(int)1280, height=(int)720, framerate=(fraction)25/1, pixel-aspect-ratio=(fraction)1/1, parsed=(boolean)true'."
+
+Warning: "No decoder available for type 'video/x-h264, stream-format=(string)avc, alignment=(string)au, level=(string)3, profile=(string)constrained-baseline, codec_data=(buffer)0142c01effe1001c6742c01e9a7301687b7fe00400036200000300c800002ed51e2c5cd001000568c9632c80, width=(int)720, height=(int)480, framerate=(fraction)2997/100, pixel-aspect-ratio=(fraction)853/720, parsed=(boolean)true'."
+
+
+解决（安装gstreamer-ffmpeg）：
+sudo add-apt-repository ppa:mc3man/trusty-media
+sudo apt-get update
+sudo apt-get install gstreamer0.10-ffmpeg
+
+centos:
+yum -y install http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm
+yum install gstreamer-plugins-bad gstreamer-plugins-ugly xine-lib-extras-nonfree gstreamer-ffmpeg
