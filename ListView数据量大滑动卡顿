@@ -1,0 +1,11 @@
+Arm下面listview加载数据多滑动很卡，是因为Text控件的字体渲染机制问题。Qt默认字体渲染方式为Qt渲染，改成本地渲染就可以了。
+嵌入式设备中主要是字体渲染占资源比较多。
+
+Text组件下：
+renderType : enumeration
+
+Override the default rendering type for this component.
+Supported render types are:
+Text.QtRendering - the default    
+Text.NativeRendering
+Select Text.NativeRendering if you prefer text to look native on the target platform and do not require advanced features such as transformation of the text. Using such features in combination with the NativeRendering render type will lend poor and sometimes pixelated results.
