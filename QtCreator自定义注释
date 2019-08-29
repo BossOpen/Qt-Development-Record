@@ -11,6 +11,15 @@
 ** Return        void
 ** 
 ****************************************************************************/
+或者
+/*!
+*  @brief              brief
+*  @param
+*  @author             Zhou Tao
+*  @date               %{CurrentDate:yyyy-MM-dd} 
+*  @return             void
+*/
+
 创建文件头注释：
 /****************************************************************************
 ** 
@@ -29,6 +38,24 @@
 ** @history:    Create.
 ** 
 ****************************************************************************/
+或者
+/*!
+*  Copyright (C) %{CurrentDate:yyyy}, BL Electronic Corporation
+*  All rights reserved. 
+*
+*  @projectName        %{CurrentProject:Name} 
+*  @file               %{CurrentDocument:FileName}
+*  @brief
+*
+*  Details. 
+*
+*  @version            V1.0
+*  @author             Zhou Tao
+*  @date               %{CurrentDate:yyyy-MM-dd} 
+*
+*  @history:           Created.
+*/
+
 
 点击“OK”进行保存。
 
