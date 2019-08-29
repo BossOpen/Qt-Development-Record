@@ -1,0 +1,35 @@
+打开 Qt Creator，菜单选择：工具 -> 选项 -> 文本编辑器 -> 片段。点击“添加”按钮，编辑自定义的“触发”。
+
+例如，触发：“header”，触发种类：“custom”（也可以填写为其它内容）。然后，填写注释的内容（也可以是其它形式的代码段）：
+创建c++方法注释：
+/****************************************************************************
+**  
+** ProjectName   %{CurrentProject:Name} 
+** Brief         brief 
+** Author        Zhou Tao
+** Date          %{CurrentDate:yyyy-MM-dd} 
+** Return        void
+** 
+****************************************************************************/
+创建文件头注释：
+/****************************************************************************
+** 
+** Copyright (C) %{CurrentDate:yyyy}, BL Electronic Corporation
+** All rights reserved. 
+** 
+** @file        %{CurrentDocument:FileName}
+** @brief 
+** 
+** Details. 
+** 
+** @version     V1.0
+** @author      Zhou Tao
+** @date        %{CurrentDate:yyyy-MM-dd} 
+** 
+** @history:    Create.
+** 
+****************************************************************************/
+
+点击“OK”进行保存。
+
+在编辑器中输入“header”，就会关联刚才设置的注释。
